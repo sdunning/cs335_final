@@ -38,6 +38,10 @@ void get_grid_center(const int i, const int j, int cent[2]);
 int xres=640;
 int yres=480;
 //
+typedef struct t_board {
+	int status;
+	int value;
+} Board;
 typedef struct t_grid {
 	int status;
 	int over;
@@ -46,21 +50,29 @@ typedef struct t_grid {
 	struct t_grid *next;
 } Grid;
 Grid grid[9][9];
+Board board[9][9];
 int grid_dim=9;
 int board_dim;
 int qsize;
 
-GLuint Htexture;
-GLuint Vtexture;
+GLuint num_one;
+GLuint num_two;
+GLuint num_three;
+GLuint num_four;
+GLuint num_five;
+GLuint num_six;
+GLuint num_seven;
+GLuint num_eight;
+GLuint num_nine;
 GLuint loadBMP(const char *imagepath);
 
 
 int main(int argc, char *argv[])
 {
-	int i, j;
+	/*int i, j;
 
 	//Read parameters and skip first value
-	/*for (i = 1; i < argc; i++)
+	for (i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "-gridSize") == 0)
 		{
@@ -202,10 +214,17 @@ void init_opengl(void)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
 	glEnable(GL_TEXTURE_2D);
-	Htexture = loadBMP("H.bmp");
-	Vtexture = loadBMP("V.bmp");
+	num_one = loadBMP("one.bmp");
+	num_two = loadBMP("two.bmp");
+	num_three = loadBMP("three.bmp");
+	num_four = loadBMP("four.bmp");
+	num_five = loadBMP("five.bmp");
+	num_six = loadBMP("six.bmp");
+	num_seven = loadBMP("seven.bmp");
+	num_eight = loadBMP("eight.bmp");
+	num_nine = loadBMP("nine.bmp");
 	glBindTexture(GL_TEXTURE_2D, 0);
-	printf("tex: %i %i\n",Htexture,Vtexture);
+	printf("tex: %i %i\n",num_one);
 }
 
 void updateBoardSize(void)
@@ -282,6 +301,7 @@ void GLFWCALL mouse_click(int button, int action)
 					y <= cent[1]+qsize) {
 					if (button == GLFW_MOUSE_BUTTON_LEFT){
 						if(!gameOver){
+							grid[i][j].status = playerMove;
 						}
 						k=1;
 						break;
@@ -384,8 +404,15 @@ void render(void)
 				glColor3f(1.0f, 1.0f, 0.0f);
 			}
 			glBindTexture(GL_TEXTURE_2D, 0);
-			if (grid[i][j].status==2) glBindTexture(GL_TEXTURE_2D, Vtexture);
-			if (grid[i][j].status==1) glBindTexture(GL_TEXTURE_2D, Htexture);
+			if (grid[i][j].status==1) glBindTexture(GL_TEXTURE_2D, num_one);
+			if (grid[i][j].status==2) glBindTexture(GL_TEXTURE_2D, num_two);
+			if (grid[i][j].status==3) glBindTexture(GL_TEXTURE_2D, num_three);
+			if (grid[i][j].status==4) glBindTexture(GL_TEXTURE_2D, num_four);
+			if (grid[i][j].status==5) glBindTexture(GL_TEXTURE_2D, num_five);
+			if (grid[i][j].status==6) glBindTexture(GL_TEXTURE_2D, num_six);
+			if (grid[i][j].status==7) glBindTexture(GL_TEXTURE_2D, num_seven);
+			if (grid[i][j].status==8) glBindTexture(GL_TEXTURE_2D, num_eight);
+			if (grid[i][j].status==9) glBindTexture(GL_TEXTURE_2D, num_nine);
 			glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, 0.0f); glVertex2i(cent[0]-qsize,cent[1]-qsize);
 				glTexCoord2f(0.0f, 1.0f); glVertex2i(cent[0]-qsize,cent[1]+qsize);
