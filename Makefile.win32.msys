@@ -1,0 +1,29 @@
+##########################################################################
+# Makefile for GLFW test programs on Windows using MSYS
+#-------------------------------------------------------------------------
+# To compile the test files using this makefile, run:
+#  make -f Makefile.win32.msys
+##########################################################################
+
+CC     = gcc
+CFLAGS = -I../include -Wall -O2 -mwin32
+
+LIB    = ../lib/win32/libglfw.a
+LFLAGS = $(LIB) -lglu32 -lopengl32
+
+WINDOWS = -mwindows
+CONSOLE = -mconsole
+
+BINARIES = Sudoku.exe
+
+HEADER = ../include/GL/glfw.h
+
+all: $(BINARIES)
+
+Sudoku.exe: Sudoku.c $(LIB) $(HEADER)
+	$(CC) $(CFLAGS) $(WINDOWS) $(CONSOLE) Sudoku.c $(LFLAGS) -o $@
+    
+
+clean:
+	rm -f $(BINARIES)
+
