@@ -173,21 +173,6 @@ void generate_board(void)
 	
 }
 
-void place_random(void)
-{
-	int i, x, y;
-	srand((unsigned int)time(NULL));
-	for (i=0; i<50;i++){
-		x = rand() % 9;
-		y = rand() % 9;
-		if(board[x][y].status != 1){
-			grid[x][y].value = board[x][y].value;
-			board[x][y].status = 1;
-		}
-	}
-		
-}
-
 int winCheck()
 {
 	int x, y;
@@ -208,6 +193,28 @@ void new_game()
 	place_random();
 }
 
+void clear_board(void)
+{
+	int x, y;
+	for (x = 0; x < 9; x++){
+		for (y = 0; y < 9; y++){
+			board[x][y].value = 0;
+			board[x][y].status = 0;
+			grid[x][y].value = 0;
+		}
+	}
+}
+
+void init(void)
+{
+	int x, y;
+	for (x = 0; x < 9; x++){
+		for (y = 0; y < 9; y++){
+			board[x][y].value = test_array[x][y];
+		}
+	}
+}
+
 void fullBoard(void)
 {
 	int x, y;
@@ -221,15 +228,21 @@ void fullBoard(void)
 	printf("\n\n");
 }
 
-void init(void)
+void place_random(void)
 {
-	int x, y;
-	for (x = 0; x < 9; x++){
-		for (y = 0; y < 9; y++){
-			board[x][y].value = test_array[x][y];
+	int i, x, y;
+	srand((unsigned int)time(NULL));
+	for (i=0; i<50;i++){
+		x = rand() % 9;
+		y = rand() % 9;
+		if(board[x][y].status != 1){
+			grid[x][y].value = board[x][y].value;
+			board[x][y].status = 1;
 		}
 	}
+		
 }
+
 
 int init_glfw(void)
 {
