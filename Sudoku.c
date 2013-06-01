@@ -130,6 +130,10 @@ int main(int argc, char *argv[])
 
 void GLFWCALL checkkey(int k1, int k2)
 {
+	if (k1 == '0') {
+		playerMove = 0;
+		return;
+	}
 	if (k1 == '1') {
 		playerMove = 1;
 		return;
@@ -503,6 +507,9 @@ void render(void)
 			}
 			if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
 				glColor3f(0.4f, 1.0f, 0.4f);
+			}
+			if ((grid[i][j].value != board[i][j].value) && (grid[i][j].value != 0)){
+				glColor3f(1.0f, 0.4f, 0.4f);
 			}
 			glBindTexture(GL_TEXTURE_2D, 0);
 			if (grid[i][j].value==1) glBindTexture(GL_TEXTURE_2D, num_one);
