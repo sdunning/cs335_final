@@ -20,6 +20,7 @@
 
 void generate_board(void);
 void place_random(void);
+void clear_board(void);
 void updateBoardSize(void);
 void fullBoard(void);
 int winCheck();
@@ -188,6 +189,7 @@ int winCheck()
 
 void new_game()
 {
+	clear_board();
 	init();
 	fullBoard();
 	place_random();
