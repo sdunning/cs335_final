@@ -46,6 +46,7 @@ typedef struct t_board {
 } Board;
 typedef struct t_grid {
 	int value;
+	int status;
 	int over;
 	float color[4];
 	struct t_grid *prev;
@@ -204,123 +205,141 @@ int winCheck()
 
 int validTest(int x, int y)
 {
-	int a, b;
+	int a, b, pass;
+	pass = 1;
 	
 	//Row Check
 	for (a=0;a<9;a++){
-		if ((grid[x][y].value == grid[x][a].value)&&(y != a)){
-			return 0;
+		if ((grid[x][y].value == grid[x][a].value)&&(y != a) && (grid[x][y].value != 0)){
+			grid[x][a].status = 1;
+			pass = 0;
 		}
 	}
 	
 	//Column Check
 	for (a=0;a<9;a++){
-		if ((grid[x][y].value == grid[a][y].value)&&(x != a)){
-			return 0;
+		if ((grid[x][y].value == grid[a][y].value)&&(x != a) && (grid[x][y].value != 0)){
+			grid[a][y].status = 1;
+			pass = 0;
 		}
 	}
 	
 	//Check 1x1
-	if (((x>=0)&&(x<=2)) && ((y>=0)&&(y<=2))){
+	if (((x>=0)&&(x<=2)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
 		for (a=0;a<3;a++){
 			for (b=0;b<3;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 1x2
-	if (((x>=0)&&(x<=2)) && ((y>=3)&&(y<=5))){
+	if (((x>=0)&&(x<=2)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
 		for (a=0;a<3;a++){
 			for (b=3;b<6;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 1x3
-	if (((x>=0)&&(x<=2)) && ((y>=6)&&(y<=8))){
+	if (((x>=0)&&(x<=2)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
 		for (a=0;a<3;a++){
 			for (b=6;b<9;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x1
-	if (((x>=3)&&(x<=5)) && ((y>=0)&&(y<=2))){
+	if (((x>=3)&&(x<=5)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
 		for (a=3;a<6;a++){
 			for (b=0;b<3;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x2
-	if (((x>=3)&&(x<=5)) && ((y>=3)&&(y<=5))){
+	if (((x>=3)&&(x<=5)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
 		for (a=3;a<6;a++){
 			for (b=3;b<6;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x3
-	if (((x>=3)&&(x<=5)) && ((y>=6)&&(y<=8))){
+	if (((x>=3)&&(x<=5)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
 		for (a=3;a<6;a++){
 			for (b=6;b<9;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x1
-	if (((x>=6)&&(x<=8)) && ((y>=0)&&(y<=2))){
+	if (((x>=6)&&(x<=8)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
 		for (a=6;a<9;a++){
 			for (b=0;b<3;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x2
-	if (((x>=6)&&(x<=8)) && ((y>=3)&&(y<=5))){
+	if (((x>=6)&&(x<=8)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
 		for (a=6;a<9;a++){
 			for (b=3;b<6;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x3
-	if (((x>=6)&&(x<=8)) && ((y>=6)&&(y<=8))){
+	if (((x>=6)&&(x<=8)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
 		for (a=6;a<9;a++){
 			for (b=6;b<9;b++){
 				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				return 0;
+				grid[a][b].status = 1;
+				pass = 0;
 				}
 			}
 		}
 	}
 	
-	return 1;
-	
+	if(!pass) grid[x][y].status = 1;
+	if(pass){
+		for (a=0;a<9;a++){
+			for (b=0;b<9;b++){
+				grid[a][b].status = 0;
+			}
+		}
+	}
 }
 
 void new_game()
@@ -351,6 +370,7 @@ void init(void)
 	z = (rand() % 5) +1;
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
+		grid[x][y].status = 0;
 		if (z==1) board[x][y].value = array01[x][y];
 		if (z==2) board[x][y].value = array02[x][y];
 		if (z==3) board[x][y].value = array03[x][y];
@@ -511,7 +531,7 @@ void check_mouse(void)
 
 void GLFWCALL mouse_click(int button, int action)
 {
-	int x,y;
+	int x,y,a,b;
 	if (action == GLFW_PRESS) {
 		int i,j,k=0;
 		//center of a grid
@@ -530,6 +550,12 @@ void GLFWCALL mouse_click(int button, int action)
 						if(!gameOver){
 							if(board[i][j].status != 1){
 								grid[i][j].value = playerMove;
+								for (a=0;a<9;a++){
+									for (b=0;b<9;b++){
+										grid[a][b].status = 0;
+									}
+								}
+								validTest(i,j);
 								if (winCheck()){
 									gameOver = 1;
 								}
@@ -653,10 +679,14 @@ void render(void)
 			}
 			if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
 				glColor3f(0.4f, 1.0f, 0.4f);
+				if (grid[i][j].status == 1){
+					glColor3f(1.0f, 0.4f, 0.4f);
+				}
 			}
-			if ((grid[i][j].value != board[i][j].value) && (grid[i][j].value != 0)){
+			/*if ((grid[i][j].value != board[i][j].value) && (grid[i][j].value != 0)){
 				glColor3f(1.0f, 0.4f, 0.4f);
-			}
+			}*/
+			
 			glBindTexture(GL_TEXTURE_2D, 0);
 			if (grid[i][j].value==1) glBindTexture(GL_TEXTURE_2D, num_one);
 			if (grid[i][j].value==2) glBindTexture(GL_TEXTURE_2D, num_two);
