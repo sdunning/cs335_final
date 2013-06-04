@@ -47,6 +47,7 @@ typedef struct t_board {
 typedef struct t_grid {
 	int value;
 	int status;
+	int highlight;
 	int over;
 	float color[4];
 	struct t_grid *prev;
@@ -98,29 +99,6 @@ GLuint loadBMP(const char *imagepath);
 
 int main(int argc, char *argv[])
 {
-	/*int i, j;
-
-	//Read parameters and skip first value
-	for (i = 1; i < argc; i++)
-	{
-		if (strcmp(argv[i], "-gridSize") == 0)
-		{
-			if(argc < i+2)
-			{
-				printf("Usage: -gridSize [VALUE]\n");
-				exit(EXIT_FAILURE);
-			}
-			j = atoi(argv[i+1]);
-			if(j == 0) {
-			    printf("Enter a number for the -gridSize switch\n");
-			    exit(EXIT_FAILURE);
-			}
-			//Limit dimensions to anything between MINSIZE and MAXSIZE
-			grid_dim = (j <= MINSIZE) ? MINSIZE : ((j <= MAXSIZE) ? j : MAXSIZE);
-			i++;
-		}
-	}*/
-
 	if (init_glfw()) {
 		exit(EXIT_FAILURE);
 	}
@@ -210,6 +188,7 @@ int validTest(int x, int y)
 	
 	//Row Check
 	for (a=0;a<9;a++){
+		grid[x][a].highlight = 1;
 		if ((grid[x][y].value == grid[x][a].value)&&(y != a) && (grid[x][y].value != 0)){
 			grid[x][a].status = 1;
 			pass = 0;
@@ -218,6 +197,7 @@ int validTest(int x, int y)
 	
 	//Column Check
 	for (a=0;a<9;a++){
+		grid[a][y].highlight = 1;
 		if ((grid[x][y].value == grid[a][y].value)&&(x != a) && (grid[x][y].value != 0)){
 			grid[a][y].status = 1;
 			pass = 0;
@@ -225,22 +205,24 @@ int validTest(int x, int y)
 	}
 	
 	//Check 1x1
-	if (((x>=0)&&(x<=2)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
+	if (((x>=0)&&(x<=2)) && ((y>=0)&&(y<=2))){
 		for (a=0;a<3;a++){
 			for (b=0;b<3;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 1x2
-	if (((x>=0)&&(x<=2)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
+	if (((x>=0)&&(x<=2)) && ((y>=3)&&(y<=5))){
 		for (a=0;a<3;a++){
 			for (b=3;b<6;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
 					grid[a][b].status = 1;
 					pass = 0;
 				}
@@ -249,84 +231,91 @@ int validTest(int x, int y)
 	}
 	
 	//Check 1x3
-	if (((x>=0)&&(x<=2)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
+	if (((x>=0)&&(x<=2)) && ((y>=6)&&(y<=8))){
 		for (a=0;a<3;a++){
 			for (b=6;b<9;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x1
-	if (((x>=3)&&(x<=5)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
+	if (((x>=3)&&(x<=5)) && ((y>=0)&&(y<=2))){
 		for (a=3;a<6;a++){
 			for (b=0;b<3;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x2
-	if (((x>=3)&&(x<=5)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
+	if (((x>=3)&&(x<=5)) && ((y>=3)&&(y<=5))){
 		for (a=3;a<6;a++){
 			for (b=3;b<6;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 2x3
-	if (((x>=3)&&(x<=5)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
+	if (((x>=3)&&(x<=5)) && ((y>=6)&&(y<=8))){
 		for (a=3;a<6;a++){
 			for (b=6;b<9;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x1
-	if (((x>=6)&&(x<=8)) && ((y>=0)&&(y<=2)) && (grid[x][y].value != 0)){
+	if (((x>=6)&&(x<=8)) && ((y>=0)&&(y<=2))){
 		for (a=6;a<9;a++){
 			for (b=0;b<3;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x2
-	if (((x>=6)&&(x<=8)) && ((y>=3)&&(y<=5)) && (grid[x][y].value != 0)){
+	if (((x>=6)&&(x<=8)) && ((y>=3)&&(y<=5))){
 		for (a=6;a<9;a++){
 			for (b=3;b<6;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
 	}
 	
 	//Check 3x3
-	if (((x>=6)&&(x<=8)) && ((y>=6)&&(y<=8)) && (grid[x][y].value != 0)){
+	if (((x>=6)&&(x<=8)) && ((y>=6)&&(y<=8))){
 		for (a=6;a<9;a++){
 			for (b=6;b<9;b++){
-				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
-				grid[a][b].status = 1;
-				pass = 0;
+				grid[a][b].highlight = 1;
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b)) && (grid[x][y].value != 0)){
+					grid[a][b].status = 1;
+					pass = 0;
 				}
 			}
 		}
@@ -359,6 +348,8 @@ void clear_board(void)
 			board[x][y].value = 0;
 			board[x][y].status = 0;
 			grid[x][y].value = 0;
+			grid[x][y].status = 0;
+			grid[x][y].highlight = 0;
 		}
 	}
 }
@@ -553,6 +544,7 @@ void GLFWCALL mouse_click(int button, int action)
 								for (a=0;a<9;a++){
 									for (b=0;b<9;b++){
 										grid[a][b].status = 0;
+										grid[a][b].highlight = 0;
 									}
 								}
 								validTest(i,j);
@@ -627,7 +619,7 @@ void render(void)
 	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 	//this sets to 2D mode (no perspective)
 	glOrtho(0, xres, 0, yres, -1, 1);
-	glColor3f(0.2f, 0.2f, 0.2f);
+	glColor3f(0.4f, 0.4f, 0.4f);
 	//=======================================================
 	
 	//draw stuff
@@ -648,11 +640,11 @@ void render(void)
 	{
 		if ((i==2)||(i==5)){
 			glLineWidth(6);
-			glColor3f(1.0f, 0.0f, 0.0f);
+			glColor3f(0.0f, 0.0f, 0.0f);
 		}
 		else{
 			glLineWidth(2);
-			glColor3f(0.2f, 0.2f, 0.2f);
+			glColor3f(0.4f, 0.4f, 0.4f);
 		}
 		glBegin(GL_LINES);
 		bp += bq;
@@ -671,11 +663,17 @@ void render(void)
 		for (j=0; j<grid_dim; j++) {
 			get_grid_center(i,j,cent);
 			glColor3f(1.0f, 1.0f, 1.0f);
+			if (grid[i][j].highlight == 1){
+				glColor3f(1.0f, 1.0f, 0.3f);
+			}
 			if (grid[i][j].over) {
 				glColor3f(1.0f, 1.0f, 0.0f);
 			}
 			if (board[i][j].status == 1){
 				glColor3f(0.8f, 0.8f, 0.8f);
+			}
+			if ((grid[i][j].highlight == 1)&&(board[i][j].status == 1)){
+				glColor3f(0.8f, 0.8f, 0.5f);
 			}
 			if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
 				glColor3f(0.4f, 1.0f, 0.4f);
@@ -683,9 +681,6 @@ void render(void)
 					glColor3f(1.0f, 0.4f, 0.4f);
 				}
 			}
-			/*if ((grid[i][j].value != board[i][j].value) && (grid[i][j].value != 0)){
-				glColor3f(1.0f, 0.4f, 0.4f);
-			}*/
 			
 			glBindTexture(GL_TEXTURE_2D, 0);
 			if (grid[i][j].value==1) glBindTexture(GL_TEXTURE_2D, num_one);
