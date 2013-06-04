@@ -17,8 +17,7 @@
 #define rnd() (double)rand()/(double)RAND_MAX
 //prototypes
 
-
-void generate_board(void);
+int validTest(int x, int y);
 void place_random(void);
 void clear_board(void);
 void updateBoardSize(void);
@@ -27,7 +26,6 @@ int winCheck();
 
 int playerMove = 0;
 int gameOver  = 0;
-int init_array[9][9];
 /////
 void init(void);
 int init_glfw(void);
@@ -190,12 +188,6 @@ void GLFWCALL checkkey(int k1, int k2)
 	}
 }
 
-void pick_board(void)
-{
-	
-	
-	
-}
 
 int winCheck()
 {
@@ -208,6 +200,127 @@ int winCheck()
 		}
 	}
 	return 1;
+}
+
+int validTest(int x, int y)
+{
+	int a, b;
+	
+	//Row Check
+	for (a=0;a<9;a++){
+		if ((grid[x][y].value == grid[x][a].value)&&(y != a)){
+			return 0;
+		}
+	}
+	
+	//Column Check
+	for (a=0;a<9;a++){
+		if ((grid[x][y].value[x][y] == grid[a][y].value)&&(x != a)){
+			return 0;
+		}
+	}
+	
+	//Check 1x1
+	if (((x>=0)&&(x<=2)) && ((y>=0)&&(y<=2))){
+		for (a=0;a<3;a++){
+			for (b=0;b<3;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 1x2
+	if (((x>=0)&&(x<=2)) && ((y>=3)&&(y<=5))){
+		for (a=0;a<3;a++){
+			for (b=3;b<6;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 1x3
+	if (((x>=0)&&(x<=2)) && ((y>=6)&&(y<=8))){
+		for (a=0;a<3;a++){
+			for (b=6;b<9;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 2x1
+	if (((x>=3)&&(x<=5)) && ((y>=0)&&(y<=2))){
+		for (a=3;a<6;a++){
+			for (b=0;b<3;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 2x2
+	if (((x>=3)&&(x<=5)) && ((y>=3)&&(y<=5))){
+		for (a=3;a<6;a++){
+			for (b=3;b<6;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 2x3
+	if (((x>=3)&&(x<=5)) && ((y>=6)&&(y<=8))){
+		for (a=3;a<6;a++){
+			for (b=6;b<9;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 3x1
+	if (((x>=6)&&(x<=8)) && ((y>=0)&&(y<=2))){
+		for (a=6;a<9;a++){
+			for (b=0;b<3;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 3x2
+	if (((x>=6)&&(x<=8)) && ((y>=3)&&(y<=5))){
+		for (a=6;a<9;a++){
+			for (b=3;b<6;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	//Check 3x3
+	if (((x>=6)&&(x<=8)) && ((y>=6)&&(y<=8))){
+		for (a=6;a<9;a++){
+			for (b=6;b<9;b++){
+				if ((grid[x][y].value == grid[a][b].value)&&((x!=a)&&(y!=b))){
+				return 0;
+				}
+			}
+		}
+	}
+	
+	return 1;
+	
 }
 
 void new_game()
@@ -224,7 +337,6 @@ void clear_board(void)
 	int x, y;
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
-			init_array[x][y] = 0;
 			board[x][y].value = 0;
 			board[x][y].status = 0;
 			grid[x][y].value = 0;
