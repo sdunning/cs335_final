@@ -2,12 +2,14 @@
 //program: Sudoku.c
 //author:  Scott Dunning
 //
+//OpenGL
 //
 //
 //
 //
 //
-//
+
+//Libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -15,31 +17,36 @@
 #include <string.h>
 //macros
 #define rnd() (double)rand()/(double)RAND_MAX
-//prototypes
 
+//prototypes
 int validTest(int x, int y);
 void place_random(void);
 void clear_board(void);
 void updateBoardSize(void);
 void fullBoard(void);
 int winCheck();
-
-int playerMove = 0;
-int gameOver  = 0;
-/////
+void new_game(void);
 void init(void);
+
+void GLFWCALL checkkey(int k1, int k2);
+void GLFWCALL mouse_click(int button, int action);
+void check_mouse(void);
+
 int init_glfw(void);
 void init_opengl(void);
 
 void render(void);
-void GLFWCALL mouse_click(int button, int action);
-void check_mouse(void);
-void GLFWCALL checkkey(int k1, int k2);
-void new_game(void);
 void get_grid_center(const int i, const int j, int cent[2]);
+
+
+//Global Variables
+int playerMove = 0;
+int gameOver  = 0;
+
 int xres=640;
 int yres=480;
-//
+
+//Structures
 typedef struct t_board {
 	int status;
 	int value;
@@ -53,8 +60,13 @@ typedef struct t_grid {
 	struct t_grid *prev;
 	struct t_grid *next;
 } Grid;
+
+//Main Arrays
 Grid grid[9][9];
 Board board[9][9];
+
+//Hard Coded completed
+//game boards
 int array01[9][9] = {{4,9,1,2,5,3,6,8,7},{5,2,6,8,7,1,9,3,4},
 					 {7,3,8,9,4,6,5,1,2},{8,7,2,3,9,4,1,6,5},
 					 {3,4,9,6,1,5,2,7,8},{1,6,5,7,2,8,3,4,9},
@@ -85,6 +97,8 @@ int grid_dim=9;
 int board_dim;
 int qsize;
 
+
+//Variables for number images
 GLuint num_one;
 GLuint num_two;
 GLuint num_three;
@@ -97,6 +111,7 @@ GLuint num_nine;
 GLuint loadBMP(const char *imagepath);
 
 
+//Main
 int main(int argc, char *argv[])
 {
 	if (init_glfw()) {
@@ -105,7 +120,7 @@ int main(int argc, char *argv[])
 	init_opengl();
 	new_game();
 	
-	
+	//Main Loop
 	while(1) {
 	    glfwGetWindowSize(&xres, &yres);
 		updateBoardSize();	
@@ -121,8 +136,10 @@ int main(int argc, char *argv[])
 	glfwTerminate();
 	exit(EXIT_SUCCESS);
 }
+//End Main
 
-
+//Checks for number key presses
+//and sets playerMove as that number
 void GLFWCALL checkkey(int k1, int k2)
 {
 	if (k1 == '0') {
@@ -167,7 +184,8 @@ void GLFWCALL checkkey(int k1, int k2)
 	}
 }
 
-
+//Detects whether the player board
+//is completed correctly or not
 int winCheck()
 {
 	int x, y;
@@ -181,6 +199,9 @@ int winCheck()
 	return 1;
 }
 
+//Main Algorithm -- Accepts grid
+//coordinates and looks for
+//contradicting cells
 int validTest(int x, int y)
 {
 	int a, b, pass;
@@ -330,7 +351,9 @@ int validTest(int x, int y)
 		}
 	}
 }
+//End Main Algorithm
 
+//Initializes a new game
 void new_game()
 {
 	clear_board();
@@ -340,6 +363,7 @@ void new_game()
 	gameOver = 0;
 }
 
+//Clears Board and structure values
 void clear_board(void)
 {
 	int x, y;
@@ -354,6 +378,8 @@ void clear_board(void)
 	}
 }
 
+//Picks a random hard coded board and
+//sets it equal to the board structure
 void init(void)
 {
 	int x, y, z;
@@ -371,6 +397,8 @@ void init(void)
 	}
 }
 
+//Prints the chosen hard coded board
+//to the console for debuging
 void fullBoard(void)
 {
 	int x, y;
@@ -384,6 +412,10 @@ void fullBoard(void)
 	printf("\n\n");
 }
 
+//Sets up the playable board by
+//chosing a maximum of 50 cells
+//and filling them with the
+//correct value
 void place_random(void)
 {
 	int i, x, y;
@@ -400,13 +432,7 @@ void place_random(void)
 }
 
 
-
-
-
-
-
-
-
+//initialize GLFW
 int init_glfw(void)
 {
 	int nmodes;
@@ -437,6 +463,7 @@ int init_glfw(void)
 	return 0;
 }
 
+//initialize OpenGL
 void init_opengl(void)
 {
 	//OpenGL initialization
@@ -465,6 +492,8 @@ void init_opengl(void)
 	printf("tex: %i %i\n",num_one);
 }
 
+
+//Self explanitory
 void updateBoardSize(void)
 {
 	//Add border of 10% of height or width of the window
@@ -482,6 +511,7 @@ void updateBoardSize(void)
     qsize = (bq - (board_dim * .005f))/2;
 }
 
+//Checks mouse position
 void check_mouse(void)
 {
 	static int sx=0,sy=0;	
@@ -520,6 +550,8 @@ void check_mouse(void)
 	}
 }
 
+//Detects left mouse click
+//and does actions that follow
 void GLFWCALL mouse_click(int button, int action)
 {
 	int x,y,a,b;
@@ -562,9 +594,10 @@ void GLFWCALL mouse_click(int button, int action)
 		}
 	}
 }
+
+//Self explanitory
 void get_grid_center(const int i, const int j, int cent[2])
 {
-	//This function can be optimized, and made more generic.
 	int b2 = board_dim/2;
 	int screen_center[2] = {xres/2, yres/2};
 	int s0 = screen_center[0];
@@ -578,7 +611,7 @@ void get_grid_center(const int i, const int j, int cent[2])
 	
 	//bq is the width of one grid section
 	bq = (board_dim / grid_dim);
-	//-------------------------------------
+	
 	quad[0] = s0-b2;
 	quad[1] = s1-b2;
 	cent[0] = quad[0] + bq/2;
@@ -587,12 +620,13 @@ void get_grid_center(const int i, const int j, int cent[2])
 	cent[1] += (bq * i);
 }
 
+
+//Render OpenGL function
+//includes statements for
+//color changes
 void render(void)
 {
 	int i,j;
-	//--------------------------------------------------------
-	//This code is repeated several times in this program, so
-	//it can be made more generic and cleaner with some work.
 	int b2 = board_dim/2;
 	int screen_center[2] = {xres/2, yres/2};
 	int s0 = screen_center[0];
@@ -635,7 +669,6 @@ void render(void)
 	glColor3f(0.0f, 0.0f, 0.0f);
 	bp = 0;
 	glLineWidth(2);
-	//glBegin(GL_LINES);
 	for(i = 0; i < grid_dim-1; i++)
 	{
 		if ((i==2)||(i==5)){
@@ -654,11 +687,10 @@ void render(void)
 		glVertex2i(s0+b2, (s1-b2) + bp);
 		glEnd();
 	}
-	//glEnd();
-	//
+	
 	//draw a new square in center of each grid
 	//squares are slightly smaller than grid
-	//
+	
 	for (i=0; i<grid_dim; i++) {
 		for (j=0; j<grid_dim; j++) {
 			get_grid_center(i,j,cent);
@@ -703,6 +735,7 @@ void render(void)
 	}
 }
 
+//BMP image loader function
 GLuint loadBMP(const char *imagepath)
 {
 	//When you create your texture files, please specify
