@@ -215,7 +215,7 @@ int validTest(int x, int y)
 	
 	//Column Check
 	for (a=0;a<9;a++){
-		if ((grid[x][y].value[x][y] == grid[a][y].value)&&(x != a)){
+		if ((grid[x][y].value == grid[a][y].value)&&(x != a)){
 			return 0;
 		}
 	}
