@@ -42,6 +42,11 @@ void get_grid_center(const int i, const int j, int cent[2]);
 //Global Variables
 int playerMove = 0;
 int gameOver  = 0;
+int gameState = 0;
+int endGame = 0;
+int mouseOver01 = 0;
+int mouseOver02 = 0;
+int mouseOver03 = 0;
 
 int xres=640;
 int yres=480;
@@ -98,7 +103,10 @@ int board_dim;
 int qsize;
 
 
-//Variables for number images
+//Variables for images
+GLuint playGame;
+GLuint newGame;
+GLuint quit;
 GLuint num_one;
 GLuint num_two;
 GLuint num_three;
@@ -130,6 +138,7 @@ int main(int argc, char *argv[])
 		check_mouse();
 		render();
 		glfwSwapBuffers();
+		if (endGame == 1) break;
 		if (glfwGetKey(GLFW_KEY_ESC) == GLFW_PRESS) break;
 		if (!glfwGetWindowParam(GLFW_OPENED)) break;
 	}
@@ -142,6 +151,10 @@ int main(int argc, char *argv[])
 //and sets playerMove as that number
 void GLFWCALL checkkey(int k1, int k2)
 {
+	if (k1 == 'P') {
+		gameState = 0;
+		return;
+	}
 	if (k1 == '0') {
 		playerMove = 0;
 		return;
@@ -479,6 +492,9 @@ void init_opengl(void)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
 	glEnable(GL_TEXTURE_2D);
+	playGame = loadBMP("play_game.bmp");
+	newGame = loadBMP("new_game.bmp");
+	quit = loadBMP("quit.bmp");
 	num_one = loadBMP("one.bmp");
 	num_two = loadBMP("two.bmp");
 	num_three = loadBMP("three.bmp");
@@ -527,26 +543,55 @@ void check_mouse(void)
 	//
 	//is the mouse over any grid squares?
 	//
-	for (i=0; i<grid_dim; i++) {
-		for (j=0; j<grid_dim; j++) {
-			grid[i][j].over=0;
+	if (gameState == 1){
+		for (i=0; i<grid_dim; i++) {
+			for (j=0; j<grid_dim; j++) {
+				grid[i][j].over=0;
+			}
 		}
-	}
-	for (i=0; i<grid_dim; i++) {
-		for (j=0; j<grid_dim; j++) {
-			get_grid_center(i,j,cent);
-			if (x >= cent[0]-qsize &&
-				x <= cent[0]+qsize &&
-				y >= cent[1]-qsize &&
-				y <= cent[1]+qsize) {
-				grid[i][j].over=1;
-				break;
+		for (i=0; i<grid_dim; i++) {
+			for (j=0; j<grid_dim; j++) {
+				get_grid_center(i,j,cent);
+				if (x >= cent[0]-qsize &&
+					x <= cent[0]+qsize &&
+					y >= cent[1]-qsize &&
+					y <= cent[1]+qsize) {
+					grid[i][j].over=1;
+					break;
 				//You could do a return here.
 				//If more code is added below, a return
 				//would cause you to exit too early.
+				}
 			}
+			if (grid[i][j].over) break;
 		}
-		if (grid[i][j].over) break;
+	}
+	if (gameState == 0){
+		mouseOver01 = 0;
+		mouseOver02 = 0;
+		mouseOver03 = 0;
+		int b2 = board_dim/2;
+		int screen_center[2] = {xres/2, yres/2};
+		int s0 = screen_center[0];
+		int s1 = screen_center[1];
+		if (x >= s0-(b2/3) &&
+			x <= s0+(b2/3) &&
+			y >= (s1-(b2/8))+((s1-(b2/4))/2) &&
+			y <= (s1+(b2/8))+((s1-(b2/4))/2)){
+			mouseOver01 = 1;
+		}
+		if (x >= s0-(b2/3) &&
+			x <= s0+(b2/3) &&
+			y >= s1-(b2/8) &&
+			y <= s1+(b2/8)){
+			mouseOver02 = 1;
+		}
+		if (x >= s0-(b2/3) &&
+			x <= s0+(b2/3) &&
+			y >= (s1-(b2/8))-((s1-(b2/4))/2) &&
+			y <= (s1+(b2/8))-((s1-(b2/4))/2)){
+			mouseOver03 = 1;
+		}
 	}
 }
 
@@ -562,34 +607,67 @@ void GLFWCALL mouse_click(int button, int action)
 		glfwGetMousePos(&x, &y);
 		//reverse the y position
 		y = yres - y;
-		for (i=0; i<grid_dim; i++) {
-			for (j=0; j<grid_dim; j++) {
-				get_grid_center(i,j,cent);
-				if (x >= cent[0]-qsize &&
-					x <= cent[0]+qsize &&
-					y >= cent[1]-qsize &&
-					y <= cent[1]+qsize) {
-					if (button == GLFW_MOUSE_BUTTON_LEFT){
-						if(!gameOver){
-							if(board[i][j].status != 1){
-								grid[i][j].value = playerMove;
-								for (a=0;a<9;a++){
-									for (b=0;b<9;b++){
-										grid[a][b].status = 0;
-										grid[a][b].highlight = 0;
+		if (gameState == 1){
+			for (i=0; i<grid_dim; i++) {
+				for (j=0; j<grid_dim; j++) {
+					get_grid_center(i,j,cent);
+					if (x >= cent[0]-qsize &&
+						x <= cent[0]+qsize &&
+						y >= cent[1]-qsize &&
+						y <= cent[1]+qsize) {
+						if (button == GLFW_MOUSE_BUTTON_LEFT){
+							if(!gameOver){
+								if(board[i][j].status != 1){
+									grid[i][j].value = playerMove;
+									for (a=0;a<9;a++){
+										for (b=0;b<9;b++){
+											grid[a][b].status = 0;
+											grid[a][b].highlight = 0;
+										}
+									}
+									validTest(i,j);
+									if (winCheck()){
+										gameOver = 1;
 									}
 								}
-								validTest(i,j);
-								if (winCheck()){
-									gameOver = 1;
-								}
 							}
+							k=1;
+							break;
 						}
-						k=1;
-						break;
 					}
+					if (k) break;
 				}
-				if (k) break;
+			}
+		}
+		if (gameState == 0){
+			int b2 = board_dim/2;
+			int screen_center[2] = {xres/2, yres/2};
+			int s0 = screen_center[0];
+			int s1 = screen_center[1];
+			if (x >= s0-(b2/3) &&
+				x <= s0+(b2/3) &&
+				y >= (s1-(b2/8))+((s1-(b2/4))/2) &&
+				y <= (s1+(b2/8))+((s1-(b2/4))/2)){
+				if (button == GLFW_MOUSE_BUTTON_LEFT){
+					gameState = 1;
+				}
+			}
+			if (x >= s0-(b2/3) &&
+				x <= s0+(b2/3) &&
+				y >= s1-(b2/8) &&
+				y <= s1+(b2/8)){
+				if (button == GLFW_MOUSE_BUTTON_LEFT){
+					new_game();
+					gameState = 1;
+				}
+			}
+			if (x >= s0-(b2/3) &&
+				x <= s0+(b2/3) &&
+				y >= (s1-(b2/8))-((s1-(b2/4))/2) &&
+				y <= (s1+(b2/8))-((s1-(b2/4))/2)){
+				if (button == GLFW_MOUSE_BUTTON_LEFT){
+					endGame = 1;
+				}
 			}
 		}
 	}
@@ -653,84 +731,136 @@ void render(void)
 	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
 	//this sets to 2D mode (no perspective)
 	glOrtho(0, xres, 0, yres, -1, 1);
-	glColor3f(0.4f, 0.4f, 0.4f);
-	//=======================================================
 	
 	//draw stuff
-	//draw the main game board in middle of screen
-	glBegin(GL_QUADS);
-		glVertex2i(s0-b2, s1-b2);
-		glVertex2i(s0-b2, s1+b2);
-		glVertex2i(s0+b2, s1+b2);
-		glVertex2i(s0+b2, s1-b2);
-	glEnd();
-	//draw grid lines
-	//vertical
-	glColor3f(0.0f, 0.0f, 0.0f);
-	bp = 0;
-	glLineWidth(2);
-	for(i = 0; i < grid_dim-1; i++)
-	{
-		if ((i==2)||(i==5)){
-			glLineWidth(6);
-			glColor3f(0.0f, 0.0f, 0.0f);
-		}
-		else{
-			glLineWidth(2);
-			glColor3f(0.4f, 0.4f, 0.4f);
-		}
-		glBegin(GL_LINES);
-		bp += bq;
-		glVertex2i((s0-b2) + bp, s1-b2);
-		glVertex2i((s0-b2) + bp, s1+b2);
-		glVertex2i(s0-b2, (s1-b2) + bp);
-		glVertex2i(s0+b2, (s1-b2) + bp);
+	//======================================================
+	if (gameState == 0){
+		glColor3f(0.4f, 0.4f, 1.0f);
+		glBegin(GL_QUADS);
+			glVertex2i(s0-b2, s1-b2);
+			glVertex2i(s0-b2, s1+b2);
+			glVertex2i(s0+b2, s1+b2);
+			glVertex2i(s0+b2, s1-b2);
 		glEnd();
+		
+		if (mouseOver01 == 1){
+			glColor3f(1.0f, 1.0f, 0.0f);
+		}
+		else glColor3f(0.4f, 1.0f, 0.4f);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, playGame);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), (s1-(b2/8))+((s1-(b2/4))/2));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-(b2/3), (s1+(b2/8))+((s1-(b2/4))/2));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/3), (s1+(b2/8))+((s1-(b2/4))/2));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/3), (s1-(b2/8))+((s1-(b2/4))/2));
+		glEnd();
+		
+		if (mouseOver02 == 1){
+			glColor3f(1.0f, 1.0f, 0.0f);
+		}
+		else glColor3f(0.4f, 1.0f, 0.4f);
+		glBindTexture(GL_TEXTURE_2D, newGame);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), s1-(b2/8));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-(b2/3), s1+(b2/8));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/3), s1+(b2/8));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/3), s1-(b2/8));
+		glEnd();
+		
+		if (mouseOver03 == 1){
+			glColor3f(1.0f, 1.0f, 0.0f);
+		}
+		else glColor3f(0.4f, 1.0f, 0.4f);
+		glBindTexture(GL_TEXTURE_2D, quit);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), (s1-(b2/8))-((s1-(b2/4))/2));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-(b2/3), (s1+(b2/8))-((s1-(b2/4))/2));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/3), (s1+(b2/8))-((s1-(b2/4))/2));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/3), (s1-(b2/8))-((s1-(b2/4))/2));
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	
-	//draw a new square in center of each grid
-	//squares are slightly smaller than grid
+	//=======================================================	
+	//draw the main game board in middle of screen
 	
-	for (i=0; i<grid_dim; i++) {
-		for (j=0; j<grid_dim; j++) {
-			get_grid_center(i,j,cent);
-			glColor3f(1.0f, 1.0f, 1.0f);
-			if (grid[i][j].highlight == 1){
-				glColor3f(1.0f, 1.0f, 0.3f);
+	if (gameState == 1){
+		glColor3f(0.4f, 0.4f, 0.4f);
+		glBegin(GL_QUADS);
+			glVertex2i(s0-b2, s1-b2);
+			glVertex2i(s0-b2, s1+b2);
+			glVertex2i(s0+b2, s1+b2);
+			glVertex2i(s0+b2, s1-b2);
+		glEnd();
+		//draw grid lines
+		//vertical
+		glColor3f(0.0f, 0.0f, 0.0f);
+		bp = 0;
+		glLineWidth(2);
+		for(i = 0; i < grid_dim-1; i++)
+		{
+			if ((i==2)||(i==5)){
+				glLineWidth(6);
+				glColor3f(0.0f, 0.0f, 0.0f);
 			}
-			if (grid[i][j].over) {
-				glColor3f(1.0f, 1.0f, 0.0f);
+			else{
+				glLineWidth(2);
+				glColor3f(0.4f, 0.4f, 0.4f);
 			}
-			if (board[i][j].status == 1){
-				glColor3f(0.8f, 0.8f, 0.8f);
-			}
-			if ((grid[i][j].highlight == 1)&&(board[i][j].status == 1)){
-				glColor3f(0.8f, 0.8f, 0.5f);
-			}
-			if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
-				glColor3f(0.4f, 1.0f, 0.4f);
-				if (grid[i][j].status == 1){
-					glColor3f(1.0f, 0.4f, 0.4f);
-				}
-			}
-			
-			glBindTexture(GL_TEXTURE_2D, 0);
-			if (grid[i][j].value==1) glBindTexture(GL_TEXTURE_2D, num_one);
-			if (grid[i][j].value==2) glBindTexture(GL_TEXTURE_2D, num_two);
-			if (grid[i][j].value==3) glBindTexture(GL_TEXTURE_2D, num_three);
-			if (grid[i][j].value==4) glBindTexture(GL_TEXTURE_2D, num_four);
-			if (grid[i][j].value==5) glBindTexture(GL_TEXTURE_2D, num_five);
-			if (grid[i][j].value==6) glBindTexture(GL_TEXTURE_2D, num_six);
-			if (grid[i][j].value==7) glBindTexture(GL_TEXTURE_2D, num_seven);
-			if (grid[i][j].value==8) glBindTexture(GL_TEXTURE_2D, num_eight);
-			if (grid[i][j].value==9) glBindTexture(GL_TEXTURE_2D, num_nine);
-			glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 0.0f); glVertex2i(cent[0]-qsize,cent[1]-qsize);
-				glTexCoord2f(0.0f, 1.0f); glVertex2i(cent[0]-qsize,cent[1]+qsize);
-				glTexCoord2f(1.0f, 1.0f); glVertex2i(cent[0]+qsize,cent[1]+qsize);
-				glTexCoord2f(1.0f, 0.0f); glVertex2i(cent[0]+qsize,cent[1]-qsize);
+			glBegin(GL_LINES);
+			bp += bq;
+			glVertex2i((s0-b2) + bp, s1-b2);
+			glVertex2i((s0-b2) + bp, s1+b2);
+			glVertex2i(s0-b2, (s1-b2) + bp);
+			glVertex2i(s0+b2, (s1-b2) + bp);
 			glEnd();
-			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	
+		//draw a new square in center of each grid
+		//squares are slightly smaller than grid
+	
+		for (i=0; i<grid_dim; i++) {
+			for (j=0; j<grid_dim; j++) {
+				get_grid_center(i,j,cent);
+				glColor3f(1.0f, 1.0f, 1.0f);
+				if (grid[i][j].highlight == 1){
+					glColor3f(1.0f, 1.0f, 0.3f);
+					}
+				if (grid[i][j].over) {
+					glColor3f(1.0f, 1.0f, 0.0f);
+				}
+				if (board[i][j].status == 1){
+					glColor3f(0.8f, 0.8f, 0.8f);
+				}
+				if ((grid[i][j].highlight == 1)&&(board[i][j].status == 1)){
+					glColor3f(0.8f, 0.8f, 0.5f);
+				}
+				if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
+					glColor3f(0.4f, 1.0f, 0.4f);
+					if (grid[i][j].status == 1){
+						glColor3f(1.0f, 0.4f, 0.4f);
+					}
+				}
+			
+				glBindTexture(GL_TEXTURE_2D, 0);
+				if (grid[i][j].value==1) glBindTexture(GL_TEXTURE_2D, num_one);
+				if (grid[i][j].value==2) glBindTexture(GL_TEXTURE_2D, num_two);
+				if (grid[i][j].value==3) glBindTexture(GL_TEXTURE_2D, num_three);
+				if (grid[i][j].value==4) glBindTexture(GL_TEXTURE_2D, num_four);
+				if (grid[i][j].value==5) glBindTexture(GL_TEXTURE_2D, num_five);
+				if (grid[i][j].value==6) glBindTexture(GL_TEXTURE_2D, num_six);
+				if (grid[i][j].value==7) glBindTexture(GL_TEXTURE_2D, num_seven);
+				if (grid[i][j].value==8) glBindTexture(GL_TEXTURE_2D, num_eight);
+				if (grid[i][j].value==9) glBindTexture(GL_TEXTURE_2D, num_nine);
+				glBegin(GL_QUADS);
+					glTexCoord2f(0.0f, 0.0f); glVertex2i(cent[0]-qsize,cent[1]-qsize);
+					glTexCoord2f(0.0f, 1.0f); glVertex2i(cent[0]-qsize,cent[1]+qsize);
+					glTexCoord2f(1.0f, 1.0f); glVertex2i(cent[0]+qsize,cent[1]+qsize);
+					glTexCoord2f(1.0f, 0.0f); glVertex2i(cent[0]+qsize,cent[1]-qsize);
+				glEnd();
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 		}
 	}
 }
