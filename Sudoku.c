@@ -19,7 +19,7 @@
 #define rnd() (double)rand()/(double)RAND_MAX
 
 //prototypes
-int validTest(int x, int y);
+void validTest(int x, int y);
 void place_random(void);
 void clear_board(void);
 void updateBoardSize(void);
@@ -47,6 +47,7 @@ int endGame = 0;
 int mouseOver01 = 0;
 int mouseOver02 = 0;
 int mouseOver03 = 0;
+int mouseOver04 = 0;
 
 int xres=640;
 int yres=480;
@@ -72,6 +73,8 @@ Board board[9][9];
 
 //Hard Coded completed
 //game boards
+//======================================================================
+//======================================================================
 int array01[9][9] = {{4,9,1,2,5,3,6,8,7},{5,2,6,8,7,1,9,3,4},
 					 {7,3,8,9,4,6,5,1,2},{8,7,2,3,9,4,1,6,5},
 					 {3,4,9,6,1,5,2,7,8},{1,6,5,7,2,8,3,4,9},
@@ -97,16 +100,22 @@ int array05[9][9] = {{6,4,7,3,1,9,2,5,8},{5,2,1,7,4,8,9,6,3},
 					 {9,6,4,1,5,3,8,2,7},{3,7,8,2,9,6,4,1,5},
 					 {2,1,6,9,7,5,3,8,4},{7,8,5,6,3,4,1,9,2},
 					 {4,3,9,8,2,1,5,7,6}};
-
+//======================================================================
+//======================================================================
+					 
 int grid_dim=9;
 int board_dim;
 int qsize;
 
 
 //Variables for images
+GLuint backGround;
+GLuint ball;
 GLuint playGame;
 GLuint newGame;
 GLuint quit;
+GLuint rules_button;
+GLuint rules;
 GLuint num_one;
 GLuint num_two;
 GLuint num_three;
@@ -215,7 +224,7 @@ int winCheck()
 //Main Algorithm -- Accepts grid
 //coordinates and looks for
 //contradicting cells
-int validTest(int x, int y)
+void validTest(int x, int y)
 {
 	int a, b, pass;
 	pass = 1;
@@ -489,23 +498,30 @@ void init_opengl(void)
 	//glShadeModel(GL_FLAT);
 	glShadeModel(GL_SMOOTH);
 	glDisable(GL_LIGHTING);
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
 	glEnable(GL_TEXTURE_2D);
-	playGame = loadBMP("play_game.bmp");
-	newGame = loadBMP("new_game.bmp");
-	quit = loadBMP("quit.bmp");
-	num_one = loadBMP("one.bmp");
-	num_two = loadBMP("two.bmp");
-	num_three = loadBMP("three.bmp");
-	num_four = loadBMP("four.bmp");
-	num_five = loadBMP("five.bmp");
-	num_six = loadBMP("six.bmp");
-	num_seven = loadBMP("seven.bmp");
-	num_eight = loadBMP("eight.bmp");
-	num_nine = loadBMP("nine.bmp");
+	backGround = loadBMP("images/backGround.bmp");
+	ball = loadBMP("images/ball.bmp");
+	playGame = loadBMP("images/play_game.bmp");
+	newGame = loadBMP("images/new_game.bmp");
+	quit = loadBMP("images/quit.bmp");
+	rules_button = loadBMP("images/rules_button.bmp");
+	rules = loadBMP("images/rules.bmp");
+	num_one = loadBMP("images/one.bmp");
+	num_two = loadBMP("images/two.bmp");
+	num_three = loadBMP("images/three.bmp");
+	num_four = loadBMP("images/four.bmp");
+	num_five = loadBMP("images/five.bmp");
+	num_six = loadBMP("images/six.bmp");
+	num_seven = loadBMP("images/seven.bmp");
+	num_eight = loadBMP("images/eight.bmp");
+	num_nine = loadBMP("images/nine.bmp");
 	glBindTexture(GL_TEXTURE_2D, 0);
-	printf("tex: %i %i\n",num_one);
 }
 
 
@@ -570,6 +586,7 @@ void check_mouse(void)
 		mouseOver01 = 0;
 		mouseOver02 = 0;
 		mouseOver03 = 0;
+		mouseOver04 = 0;
 		int b2 = board_dim/2;
 		int screen_center[2] = {xres/2, yres/2};
 		int s0 = screen_center[0];
@@ -591,6 +608,12 @@ void check_mouse(void)
 			y >= (s1-(b2/8))-((s1-(b2/4))/2) &&
 			y <= (s1+(b2/8))-((s1-(b2/4))/2)){
 			mouseOver03 = 1;
+		}
+		if (x >= s0-(b2/6) &&
+			x <= s0+(b2/6) &&
+			y >= (s1-(b2/11))-(s1-(b2/3)) &&
+			y <= (s1+(b2/11))-(s1-(b2/3))){
+			mouseOver04 = 1;
 		}
 	}
 }
@@ -669,6 +692,14 @@ void GLFWCALL mouse_click(int button, int action)
 					endGame = 1;
 				}
 			}
+			if (x >= s0-(b2/6) &&
+				x <= s0+(b2/6) &&
+				y >= (s1-(b2/11))-(s1-(b2/3)) &&
+				y <= (s1+(b2/11))-(s1-(b2/3))){
+				if (button == GLFW_MOUSE_BUTTON_LEFT){
+					gameState = 2;
+				}
+			}
 		}
 	}
 }
@@ -680,7 +711,7 @@ void get_grid_center(const int i, const int j, int cent[2])
 	int screen_center[2] = {xres/2, yres/2};
 	int s0 = screen_center[0];
 	int s1 = screen_center[1];
-	int bq, bp;
+	int bq;
 	//quad upper-left corner
 	int quad[2];
 	
@@ -710,8 +741,7 @@ void render(void)
 	int s0 = screen_center[0];
 	int s1 = screen_center[1];
 	int bq, bp;
-	//quad upper-left corner
-	int quad[2], saveq0;
+
 	//center of a grid
 	int cent[2];
 	//bq is the width of one grid section
@@ -722,8 +752,14 @@ void render(void)
 	glViewport(0, 0, xres, yres);
 	//clear color buffer
 	glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
-	if (gameOver == 1){
-		glClearColor(0.2f, 0.2f, 9.0f, 0.0f);
+	if (gameState == 1){
+		if (gameOver == 1){
+			glClearColor(0.2f, 0.2f, 1.0f, 1.0f);
+		}
+		else glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	}
+	if (gameState == 0){
+		glClearColor(0.3f, 0.8f, 0.3f, 0.3f);
 	}
 	glClear(GL_COLOR_BUFFER_BIT);
 	//init matrices
@@ -733,21 +769,47 @@ void render(void)
 	glOrtho(0, xres, 0, yres, -1, 1);
 	
 	//draw stuff
-	//======================================================
+	if (gameState == 1){
+		if (gameOver == 1){
+			glColor3f(0.2f, 0.2f, 1.0f);
+		}
+		else glColor3f(0.7f, 0.7f, 0.7f);
+	}
 	if (gameState == 0){
-		glColor3f(0.4f, 0.4f, 1.0f);
+		glColor3f(0.3f, 0.8f, 0.3f);
+	}
+	if (gameState == 2){
+		glColor3f(0.3f, 0.8f, 0.3f);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, backGround);
 		glBegin(GL_QUADS);
-			glVertex2i(s0-b2, s1-b2);
-			glVertex2i(s0-b2, s1+b2);
-			glVertex2i(s0+b2, s1+b2);
-			glVertex2i(s0+b2, s1-b2);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(0, 0);
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(0, yres);
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, yres);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, 0);
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
+	
+	
+	
+	
+	//=====================================================================================================
+	if (gameState == 0){
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, ball);
+		glColor4f(0.2f, 0.2f, 1.0f, 0.8f);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-b2, s1-b2);
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-b2, s1+b2);
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+b2, s1+b2);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+b2, s1-b2);
 		glEnd();
 		
 		if (mouseOver01 == 1){
 			glColor3f(1.0f, 1.0f, 0.0f);
 		}
-		else glColor3f(0.4f, 1.0f, 0.4f);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
 		glBindTexture(GL_TEXTURE_2D, playGame);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), (s1-(b2/8))+((s1-(b2/4))/2));
@@ -759,7 +821,7 @@ void render(void)
 		if (mouseOver02 == 1){
 			glColor3f(1.0f, 1.0f, 0.0f);
 		}
-		else glColor3f(0.4f, 1.0f, 0.4f);
+		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
 		glBindTexture(GL_TEXTURE_2D, newGame);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), s1-(b2/8));
@@ -771,7 +833,7 @@ void render(void)
 		if (mouseOver03 == 1){
 			glColor3f(1.0f, 1.0f, 0.0f);
 		}
-		else glColor3f(0.4f, 1.0f, 0.4f);
+		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
 		glBindTexture(GL_TEXTURE_2D, quit);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/3), (s1-(b2/8))-((s1-(b2/4))/2));
@@ -779,10 +841,36 @@ void render(void)
 			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/3), (s1+(b2/8))-((s1-(b2/4))/2));
 			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/3), (s1-(b2/8))-((s1-(b2/4))/2));
 		glEnd();
+		
+		if (mouseOver04 == 1){
+			glColor3f(1.0f, 1.0f, 0.0f);
+		}
+		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
+		glBindTexture(GL_TEXTURE_2D, rules_button);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/6), (s1-(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-(b2/6), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/6), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/6), (s1-(b2/11))-(s1-(b2/3)));
+		glEnd();
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	
-	//=======================================================	
+	//===============================================================================================
+	if (gameState == 2){
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, rules);
+		glColor4f(0.5f, 0.5f, 1.0f, 0.8f);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-b2, s1-b2);
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-b2, s1+b2);
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+b2, s1+b2);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+b2, s1-b2);
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	
+	//=================================================================================================
 	//draw the main game board in middle of screen
 	
 	if (gameState == 1){
@@ -871,10 +959,12 @@ GLuint loadBMP(const char *imagepath)
 	//When you create your texture files, please specify
 	//type: BMP
 	//color depth: 24-bit
+	
 	unsigned int retval;
 	unsigned char header[54];
 	//Each BMP file begins by a 54-bytes header
 	//Position in the file where the actual data begins
+	
 	unsigned int dataPos;
 	unsigned int width, height;
 	unsigned int imageSize;
