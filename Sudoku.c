@@ -35,6 +35,7 @@ void init(void);
 void generate(void);
 int addToBoard(int x, int y);
 void total(void);
+void hint(void);
 
 void GLFWCALL checkkey(int k1, int k2);
 void GLFWCALL mouse_click(int button, int action);
@@ -53,7 +54,7 @@ int gameOver  = 0;
 int gameState = 0;
 int endGame = 0;
 int count = 0;
-int count2 = 0;
+int hints = 0;
 int takenRow = 0;
 int mouseOver01 = 0;
 int mouseOver02 = 0;
@@ -150,6 +151,13 @@ void GLFWCALL checkkey(int k1, int k2)
 	}
 	if ((k1 == 'N') && (k2 == GLFW_RELEASE)) {
 		new_game();
+	}
+	if ((k1 == 'H') && (k2 == GLFW_RELEASE)) {
+		if(hints < 5){
+			hint();
+			hints++;
+		}
+		else printf("Out of Hints!!\n");
 	}
 	if (k1 == '0') {
 		playerMove = 0;
@@ -377,6 +385,7 @@ void new_game()
 void clear_board(void)
 {
 	int x, y;
+	hints = 0;
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
 			init_array[x][y] = 0;
@@ -452,8 +461,23 @@ void place_random(void)
 			grid[x][y].value = board[x][y].value;
 			board[x][y].status = 1;
 		}
+	}	
+}
+
+void hint(void)
+{
+	int x,y,success;
+	success = 0;
+	srand((unsigned int)time(NULL));
+	while(success == 0){
+		x = rand() % 9;
+		y = rand() % 9;
+		if (grid[x][y].value == 0){
+			grid[x][y].value = board[x][y].value;
+			success = 1;
+		}
 	}
-		
+	printf("Hints used: %i/5 \n",hints+1);
 }
 
 void total(void)
