@@ -18,8 +18,13 @@
 //macros
 #define rnd() (double)rand()/(double)RAND_MAX
 
+
+extern void generator(void);
+extern int init_array[9][9];
+
 //prototypes
 void validTest(int x, int y);
+int validTestReturn(int x, int y);
 void place_random(void);
 void clear_board(void);
 void updateBoardSize(void);
@@ -27,6 +32,8 @@ void fullBoard(void);
 int winCheck();
 void new_game(void);
 void init(void);
+void generate(void);
+int addToBoard(int x, int y);
 void total(void);
 
 void GLFWCALL checkkey(int k1, int k2);
@@ -46,6 +53,8 @@ int gameOver  = 0;
 int gameState = 0;
 int endGame = 0;
 int count = 0;
+int count2 = 0;
+int takenRow = 0;
 int mouseOver01 = 0;
 int mouseOver02 = 0;
 int mouseOver03 = 0;
@@ -73,6 +82,7 @@ typedef struct t_grid {
 //Main Arrays
 Grid grid[9][9];
 Board board[9][9];
+//int init_array[9][9];
 
 //Hard Coded completed
 //game boards
@@ -144,10 +154,7 @@ int main(int argc, char *argv[])
 	//Main Loop
 	while(1) {
 	    glfwGetWindowSize(&xres, &yres);
-		updateBoardSize();	
-		if (glfwGetKey('N') == GLFW_PRESS) {
-			new_game();
-        }
+		updateBoardSize();
 		check_mouse();
 		render();
 		glfwSwapBuffers();
@@ -164,9 +171,18 @@ int main(int argc, char *argv[])
 //and sets playerMove as that number
 void GLFWCALL checkkey(int k1, int k2)
 {
-	if (k1 == 'P') {
-		gameState = 0;
-		return;
+	if ((k1 == 'P') && (k2 == GLFW_RELEASE)) {
+		if(gameState != 0){ 
+			gameState = 0;
+			return;
+		}
+		else{
+			gameState = 1;
+			return;
+		}
+	}
+	if ((k1 == 'N') && (k2 == GLFW_RELEASE)) {
+		new_game();
 	}
 	if (k1 == '0') {
 		playerMove = 0;
@@ -379,6 +395,7 @@ void validTest(int x, int y)
 }
 //End Main Algorithm
 
+
 //Initializes a new game
 void new_game()
 {
@@ -395,6 +412,7 @@ void clear_board(void)
 	int x, y;
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
+			init_array[x][y] = 0;
 			board[x][y].value = 0;
 			board[x][y].status = 0;
 			grid[x][y].value = 0;
@@ -408,20 +426,17 @@ void clear_board(void)
 //sets it equal to the board structure
 void init(void)
 {
-	int x, y, z;
+	int x, y;
+	generate();
 	srand((unsigned int)time(NULL));
-	z = (rand() % 5) +1;
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
-		grid[x][y].status = 0;
-		if (z==1) board[x][y].value = array01[x][y];
-		if (z==2) board[x][y].value = array02[x][y];
-		if (z==3) board[x][y].value = array03[x][y];
-		if (z==4) board[x][y].value = array04[x][y];
-		if (z==5) board[x][y].value = array05[x][y];
+			grid[x][y].status = 0;
+			board[x][y].value = init_array[x][y];
 		}
 	}
 }
+
 
 //Prints the chosen hard coded board
 //to the console for debuging
@@ -432,6 +447,13 @@ void fullBoard(void)
 	for (x = 8; x >= 0; x--){
 		for (y = 0; y < 9; y++){
 			printf("%i ", board[x][y].value);
+			if ((y == 2)|| (y == 5)){
+				printf("| ");
+			}
+		}
+		if ((x == 3)|| (x == 6)){
+		    printf("\n");
+		    printf("------+-------+------");
 		}
 		printf("\n");
 	}
@@ -487,15 +509,15 @@ int init_glfw(void)
 	}
 	//get the monitor native full-screen resolution
 	nmodes = glfwGetVideoModes(glist, 250);
-	xres = glist[nmodes-1].Width;
-	yres = glist[nmodes-1].Height;
+	xres = (glist[nmodes-1].Width)/2;
+	yres = (glist[nmodes-1].Height)/2;
 	//create a window
 	if (!glfwOpenWindow(xres, yres, 0, 0, 0, 0, 0, 0, GLFW_WINDOW)) {
 	//if (!glfwOpenWindow(xres,yres,8,8,8,0,32,0,GLFW_FULLSCREEN)) {
 		glfwTerminate();
 		return 1;
 	}
-	glfwSetWindowTitle("Game Board and Grid");
+	glfwSetWindowTitle("Freaking Awesome Sause");
 	glfwSetWindowPos(0, 0);
 	//make sure we see the escape key pressed
 	glfwEnable(GLFW_STICKY_KEYS);
