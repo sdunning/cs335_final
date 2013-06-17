@@ -5,36 +5,12 @@
 
 //void generate(int*array);
 static int addToBoard(int x, int y);
-static int validTest(int x, int y);
+static int validTestReturn(int x, int y);
 //static void fullBoard(void);
 
 int init_array[9][9];
 static int count = 0;
 static int takenRow = 0;
-
-
-
-
-
-/*int main()
-{
-	int a,b;
-	generate();
-	fullBoard();
-	for (a=0;a<9;a++){
-		for (b=0;b<9;b++){
-			if ((!validTest(a,b))||(init_array[a][b] == 0)){
-				printf("Bad Number at:  ");
-				printf("%i", a);
-				printf(" : ");
-				printf("%i \n", b);
-			}
-		}
-    }
-}*/
-
-
-
 
 
 void generate(void)
@@ -51,7 +27,7 @@ void generate(void)
 		do{
 			z = (rand() % 9) +1;
 			init_array[x][a] = z;
-		}while(!validTest(x,a));
+		}while(!validTestReturn(x,a));
 	}
 	takenRow = x;
 	printf("Set row:  %i\n", takenRow);
@@ -74,7 +50,7 @@ int addToBoard(int x, int y)
 	}
 	for (a=1;a<10;a++){
 		init_array[x][y] = a;
-		if (validTest(x,y)){
+		if (validTestReturn(x,y)){
 			if (y == 8){
 				x++;
 				if(x == takenRow) x++;
@@ -91,38 +67,7 @@ int addToBoard(int x, int y)
 
 
 
-
-
-
-/*
-void fullBoard(void)
-{
-	int x, y;
-	printf("\n\n");
-	for (x = 0; x < 9; x++){
-		for (y = 0; y < 9; y++){
-			printf("%i ", init_array[x][y]);
-			if ((y == 2)|| (y == 5)){
-				printf("| ");
-			}
-		}
-		if ((x == 2)|| (x == 5)){
-		    printf("\n");
-		    printf("---------------------");
-		}
-		printf("\n");
-	}
-	printf("\n\n");
-}
-*/
-
-
-
-
-
-
-
-int validTest(int x, int y)
+int validTestReturn(int x, int y)
 {
 	int a, b;
 	
