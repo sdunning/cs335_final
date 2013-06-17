@@ -393,8 +393,18 @@ void clear_board(void)
 //sets it equal to the board structure
 void init(void)
 {
-	int x, y;
-	generate();
+	int x,y,a,b,pass;
+	pass = 0;
+	do{
+		pass = 0;
+		generate();
+		for (a=0;a<9;a++){
+			for (b=0;b<9;b++){
+				if (init_array[a][b] == 0) pass = 1;
+			}
+		}
+		
+	}while(pass == 1);
 	srand((unsigned int)time(NULL));
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
