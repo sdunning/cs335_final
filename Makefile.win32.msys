@@ -20,8 +20,8 @@ HEADER = ../include/GL/glfw.h
 
 all: $(BINARIES)
 
-Sudoku.exe: Sudoku.c Board_Generator.c $(LIB) $(HEADER)
-	$(CC) $(CFLAGS) $(WINDOWS) $(CONSOLE) Sudoku.c Board_Generator.c $(LFLAGS) -o $@
+Sudoku.exe: Sudoku.c Board_Generator.c cfonts.c fonttex.c $(LIB) $(HEADER)
+	$(CC) $(CFLAGS) $(WINDOWS) $(CONSOLE) Sudoku.c Board_Generator.c cfonts.c fonttex.c $(LFLAGS) -o $@
     
 
 clean:

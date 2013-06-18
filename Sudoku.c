@@ -15,6 +15,13 @@
 #include <time.h>
 #include <GL/glfw.h>
 #include <string.h>
+
+#include "defs.h"
+
+#include "fonts.h"
+
+
+
 //macros
 #define rnd() (double)rand()/(double)RAND_MAX
 
@@ -36,6 +43,7 @@ void generate(void);
 int addToBoard(int x, int y);
 void total(void);
 void hint(void);
+void getCurrentTime(void);
 
 void GLFWCALL checkkey(int k1, int k2);
 void GLFWCALL mouse_click(int button, int action);
@@ -55,6 +63,9 @@ int gameState = 0;
 int endGame = 0;
 int count = 0;
 int hints = 0;
+int gameStart = 0;
+int currentTime = 0;
+double pauseTime = 0;
 int takenRow = 0;
 int mouseOver01 = 0;
 int mouseOver02 = 0;
@@ -119,6 +130,15 @@ int main(int argc, char *argv[])
 	init_opengl();
 	new_game();
 	
+
+	//glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
+	//texture maps must be enabled to draw fonts
+	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
+
+	
+	getCurrentTime();
 	//Main Loop
 	while(1) {
 	    glfwGetWindowSize(&xres, &yres);
@@ -131,6 +151,11 @@ int main(int argc, char *argv[])
 		if (!glfwGetWindowParam(GLFW_OPENED)) break;
 	}
 	glfwTerminate();
+	
+	#ifdef USE_FONTS
+	cleanup_fonts();
+	#endif //USE_FONTS
+	
 	exit(EXIT_SUCCESS);
 }
 //End Main
@@ -142,10 +167,12 @@ void GLFWCALL checkkey(int k1, int k2)
 	if ((k1 == 'P') && (k2 == GLFW_RELEASE)) {
 		if(gameState != 0){ 
 			gameState = 0;
+			getCurrentTime();
 			return;
 		}
 		else{
 			gameState = 1;
+			glfwSetTime(pauseTime);
 			return;
 		}
 	}
@@ -386,6 +413,8 @@ void clear_board(void)
 {
 	int x, y;
 	hints = 0;
+	gameStart = 0;
+	glfwSetTime(0);
 	for (x = 0; x < 9; x++){
 		for (y = 0; y < 9; y++){
 			init_array[x][y] = 0;
@@ -479,6 +508,23 @@ void hint(void)
 	}
 	printf("Hints used: %i/5 \n",hints+1);
 }
+
+void getCurrentTime(void)
+{
+	if (gameState != 1){
+		if (gameStart == 0){
+			gameStart = 1;
+			glfwSetTime(0);
+			pauseTime = glfwGetTime();
+		}
+		else{
+			pauseTime = glfwGetTime();
+		}
+		return;
+	}
+	return;
+}
+
 
 void total(void)
 {
@@ -719,6 +765,7 @@ void GLFWCALL mouse_click(int button, int action)
 				y <= (s1+(b2/8))+((s1-(b2/4))/3)){
 				if (button == GLFW_MOUSE_BUTTON_LEFT){
 					gameState = 1;
+					glfwSetTime(pauseTime);
 				}
 			}
 			if (x >= s0-(b2/3) &&
@@ -814,7 +861,7 @@ void render(void)
 	//this sets to 2D mode (no perspective)
 	glOrtho(0, xres, 0, yres, -1, 1);
 	
-	//draw stuff
+	//draw stuff	
 	if (gameState == 1){
 		if (gameOver == 1){
 			glColor3f(0.2f, 0.2f, 1.0f);
@@ -927,6 +974,39 @@ void render(void)
 			glVertex2i(s0+b2, s1+b2);
 			glVertex2i(s0+b2, s1-b2);
 		glEnd();
+		
+		glColor3f(0.3f, 0.3f, 0.3f);
+		glBegin(GL_QUADS);
+			glVertex2i(15, yres - 75);
+			glVertex2i(15, yres - 15);
+			glVertex2i(145, yres - 15);
+			glVertex2i(145, yres - 75);
+		glEnd();
+		
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glBegin(GL_QUADS);
+			glVertex2i(20, yres - 70);
+			glVertex2i(20, yres - 20);
+			glVertex2i(140, yres - 20);
+			glVertex2i(140, yres - 70);
+		glEnd();
+		
+		
+		//Time
+		int minutes = 0;
+		int seconds = 0;
+		currentTime = glfwGetTime();
+		minutes = currentTime / 60;
+		seconds = currentTime - (minutes*60);
+	
+		Rect r;
+			r.left   = 25;
+			r.bot    = yres -55;
+			r.center = 0;
+		
+		ggprint16(&r, 16, 0x00111111, "Time: %d:%02d",minutes,seconds);
+		//printf("%i \n", currentTime);
+		
 		//draw grid lines
 		//vertical
 		glColor3f(0.0f, 0.0f, 0.0f);
