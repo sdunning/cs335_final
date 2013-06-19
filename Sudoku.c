@@ -43,7 +43,7 @@ void generate(void);
 int addToBoard(int x, int y);
 void total(void);
 void hint(void);
-void getCurrentTime(void);
+void pause_time(void);
 
 void GLFWCALL checkkey(int k1, int k2);
 void GLFWCALL mouse_click(int button, int action);
@@ -66,6 +66,7 @@ int hints = 0;
 int gameStart = 0;
 int currentTime = 0;
 double pauseTime = 0;
+int endTime = 0;
 int takenRow = 0;
 int mouseOver01 = 0;
 int mouseOver02 = 0;
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
 	initialize_fonts();
 
 	
-	getCurrentTime();
+	pause_time();
 	//Main Loop
 	while(1) {
 	    glfwGetWindowSize(&xres, &yres);
@@ -167,7 +168,7 @@ void GLFWCALL checkkey(int k1, int k2)
 	if ((k1 == 'P') && (k2 == GLFW_RELEASE)) {
 		if(gameState != 0){ 
 			gameState = 0;
-			getCurrentTime();
+			pause_time();
 			return;
 		}
 		else{
@@ -509,7 +510,7 @@ void hint(void)
 	printf("Hints used: %i/5 \n",hints+1);
 }
 
-void getCurrentTime(void)
+void pause_time(void)
 {
 	if (gameState != 1){
 		if (gameStart == 0){
@@ -743,6 +744,12 @@ void GLFWCALL mouse_click(int button, int action)
 									validTest(i,j);
 									if (winCheck()){
 										gameOver = 1;
+										endTime = glfwGetTime();
+										int minutes = 0;
+										int seconds = 0;
+										minutes = currentTime / 60;
+										seconds = currentTime - (minutes*60);
+										printf("End Time: %d:%02d",minutes,seconds);
 									}
 								}
 							}
@@ -995,7 +1002,10 @@ void render(void)
 		//Time
 		int minutes = 0;
 		int seconds = 0;
-		currentTime = glfwGetTime();
+		if (gameOver == 1){
+			currentTime = endTime;
+		}
+		else currentTime = glfwGetTime();
 		minutes = currentTime / 60;
 		seconds = currentTime - (minutes*60);
 	
@@ -1005,7 +1015,6 @@ void render(void)
 			r.center = 0;
 		
 		ggprint16(&r, 16, 0x00111111, "Time: %d:%02d",minutes,seconds);
-		//printf("%i \n", currentTime);
 		
 		//draw grid lines
 		//vertical
@@ -1052,13 +1061,14 @@ void render(void)
 				}
 				if ((grid[i][j].value == playerMove) &&(playerMove != 0)){
 					glColor3f(0.4f, 1.0f, 0.4f);
+					total();
+					if ((grid[i][j].total == 1)&&(count == 9)){
+						glColor3f(0.4f, 0.4f, 1.0f);
+					}
 					if (grid[i][j].status == 1){
 						glColor3f(1.0f, 0.4f, 0.4f);
 					}
-				}
-				total();
-				if ((grid[i][j].total == 1)&&(count == 9)){
-					glColor3f(0.4f, 0.4f, 1.0f);
+					
 				}
 			
 				glBindTexture(GL_TEXTURE_2D, 0);
