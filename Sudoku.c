@@ -31,11 +31,11 @@ extern int init_array[9][9];
 
 //prototypes
 void validTest(int x, int y);
-int validTestReturn(int x, int y);
 void place_random(void);
 void clear_board(void);
 void updateBoardSize(void);
 void fullBoard(void);
+void print_times(void);
 int winCheck();
 void new_game(void);
 void init(void);
@@ -44,6 +44,7 @@ int addToBoard(int x, int y);
 void total(void);
 void hint(void);
 void pause_time(void);
+void add_score(void);
 
 void GLFWCALL checkkey(int k1, int k2);
 void GLFWCALL mouse_click(int button, int action);
@@ -95,6 +96,8 @@ typedef struct t_grid {
 //Main Arrays
 Grid grid[9][9];
 Board board[9][9];
+
+int scores[10];
 					 
 int grid_dim=9;
 int board_dim;
@@ -181,11 +184,14 @@ void GLFWCALL checkkey(int k1, int k2)
 		new_game();
 	}
 	if ((k1 == 'H') && (k2 == GLFW_RELEASE)) {
-		if(hints < 5){
+		if(hints < 81){
 			hint();
 			hints++;
 		}
 		else printf("Out of Hints!!\n");
+	}
+	if ((k1 == 'S') && (k2 == GLFW_RELEASE)) {
+		print_times();
 	}
 	if (k1 == '0') {
 		playerMove = 0;
@@ -417,6 +423,7 @@ void clear_board(void)
 	gameStart = 0;
 	glfwSetTime(0);
 	for (x = 0; x < 9; x++){
+		scores[x] = 0;
 		for (y = 0; y < 9; y++){
 			init_array[x][y] = 0;
 			board[x][y].value = 0;
@@ -426,6 +433,7 @@ void clear_board(void)
 			grid[x][y].highlight = 0;
 		}
 	}
+	scores[9] = 0;
 }
 
 //Picks a random hard coded board and
@@ -476,6 +484,24 @@ void fullBoard(void)
 	printf("\n\n");
 }
 
+void print_times(void)
+{
+	int time,minutes,seconds;
+	FILE *fp;
+	fp = fopen("scores.txt", "r");
+	if (fp == NULL){
+		printf("I couldn't open scores.txt for reading.\n");
+		exit(0);
+	}
+	printf("\n\n");
+	while (fscanf(fp, "%d\n", &time) == 1){
+		minutes = time / 60;
+		seconds = time - (minutes*60);
+		printf("Best Times: %d:%02d\n",minutes,seconds);
+	}
+	fclose(fp);
+}
+
 //Sets up the playable board by
 //chosing a maximum of 50 cells
 //and filling them with the
@@ -506,6 +532,16 @@ void hint(void)
 			grid[x][y].value = board[x][y].value;
 			success = 1;
 		}
+		int pass = 0;
+		for (x=0;x<9;x++){
+			for (y=0;y<9;y++){
+				if (grid[x][y].value == 0){
+					pass = 1;
+					break;
+				}
+			}
+		}
+		if (!pass) break;
 	}
 	printf("Hints used: %i/5 \n",hints+1);
 }
@@ -524,6 +560,60 @@ void pause_time(void)
 		return;
 	}
 	return;
+}
+
+void add_score(void)
+{
+	int index, j, time, temp;
+	endTime = glfwGetTime();
+	FILE *fp;
+	fp = fopen("scores.txt", "r");
+	if (fp == NULL){
+		printf("I couldn't open scores.txt for reading.\n");
+		exit(0);
+	}
+	while (fscanf(fp, "%d\n", &time) == 1){
+		scores[index] = time;
+		index++;
+	}
+	fclose(fp);
+	
+	for (index=0;index<10;index++){
+		for (j=0;j<10;j++){
+			if(scores[index] > scores[j]){
+				temp = scores[index];
+				scores[index] = scores[j];
+				scores[j] = temp;
+			}
+		}
+	}
+	
+	fp = fopen("scores.txt", "w");
+	if (fp == NULL){
+		printf("I couldn't open scores.txt for reading.\n");
+		exit(0);
+	}
+	index = 0;
+	for (j=10;j>=0;j--){
+		if (scores[j] == 0) break;
+		if (endTime < scores[j]){
+			scores[0] = endTime;
+			break;
+		}
+	}
+	while (1){
+		if (index >= 10) break;
+		if (scores[index] == 0){
+			fprintf(fp, "%d\n", endTime);
+			break;
+		}
+		else{
+			fprintf(fp, "%d\n", scores[index]);
+		}
+		index++;
+	}
+	fclose(fp);
+	
 }
 
 
@@ -744,12 +834,7 @@ void GLFWCALL mouse_click(int button, int action)
 									validTest(i,j);
 									if (winCheck()){
 										gameOver = 1;
-										endTime = glfwGetTime();
-										int minutes = 0;
-										int seconds = 0;
-										minutes = currentTime / 60;
-										seconds = currentTime - (minutes*60);
-										printf("End Time: %d:%02d",minutes,seconds);
+										add_score();
 									}
 								}
 							}
