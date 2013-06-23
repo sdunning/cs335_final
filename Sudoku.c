@@ -73,6 +73,7 @@ int mouseOver01 = 0;
 int mouseOver02 = 0;
 int mouseOver03 = 0;
 int mouseOver04 = 0;
+int mouseOver05 = 0;
 
 int xres=640;
 int yres=480;
@@ -97,7 +98,7 @@ typedef struct t_grid {
 Grid grid[9][9];
 Board board[9][9];
 
-int scores[10];
+int scores[9];
 					 
 int grid_dim=9;
 int board_dim;
@@ -111,6 +112,7 @@ GLuint playGame;
 GLuint newGame;
 GLuint quit;
 GLuint rules_button;
+GLuint top_ten;
 GLuint rules;
 GLuint win;
 GLuint num_one;
@@ -184,7 +186,7 @@ void GLFWCALL checkkey(int k1, int k2)
 		new_game();
 	}
 	if ((k1 == 'H') && (k2 == GLFW_RELEASE)) {
-		if(hints < 81){
+		if(hints < 5){
 			hint();
 			hints++;
 		}
@@ -192,6 +194,9 @@ void GLFWCALL checkkey(int k1, int k2)
 	}
 	if ((k1 == 'S') && (k2 == GLFW_RELEASE)) {
 		print_times();
+	}
+	if ((k1 == 'W') && (k2 == GLFW_RELEASE)) {
+		printf("width = %d\nheight = %d\n\n", xres,yres);
 	}
 	if (k1 == '0') {
 		playerMove = 0;
@@ -433,7 +438,6 @@ void clear_board(void)
 			grid[x][y].highlight = 0;
 		}
 	}
-	scores[9] = 0;
 }
 
 //Picks a random hard coded board and
@@ -486,7 +490,8 @@ void fullBoard(void)
 
 void print_times(void)
 {
-	int time,minutes,seconds;
+	int time,minutes,seconds,index,j;
+	int temp = 0;
 	FILE *fp;
 	fp = fopen("scores.txt", "r");
 	if (fp == NULL){
@@ -494,12 +499,32 @@ void print_times(void)
 		exit(0);
 	}
 	printf("\n\n");
+	for (index=0;index<9;index++){
+		scores[index] = 0;
+	}
+	index = 0;
 	while (fscanf(fp, "%d\n", &time) == 1){
-		minutes = time / 60;
-		seconds = time - (minutes*60);
-		printf("Best Times: %d:%02d\n",minutes,seconds);
+		scores[index] = time;
+		index++;
 	}
 	fclose(fp);
+	
+	for (index=0;index<9;index++){
+		for (j=0;j<9;j++){
+			if(((scores[index] > scores[j]) && (scores[j] != 0)) || (scores[index] == 0)){
+				temp = scores[index];
+				scores[index] = scores[j];
+				scores[j] = temp;
+			}
+		}
+	}
+	for (index=0;index<9;index++){
+		if (scores[index] != 0){
+			minutes = scores[index] / 60;
+			seconds = scores[index] - (minutes*60);
+			printf("Best Times: %d:%02d\n",minutes,seconds);
+		}
+	}
 }
 
 //Sets up the playable board by
@@ -578,8 +603,8 @@ void add_score(void)
 	}
 	fclose(fp);
 	
-	for (index=0;index<10;index++){
-		for (j=0;j<10;j++){
+	for (index=0;index<9;index++){
+		for (j=0;j<9;j++){
 			if(scores[index] > scores[j]){
 				temp = scores[index];
 				scores[index] = scores[j];
@@ -594,7 +619,7 @@ void add_score(void)
 		exit(0);
 	}
 	index = 0;
-	for (j=10;j>=0;j--){
+	for (j=9;j>=0;j--){
 		if (scores[j] == 0) break;
 		if (endTime < scores[j]){
 			scores[0] = endTime;
@@ -602,7 +627,7 @@ void add_score(void)
 		}
 	}
 	while (1){
-		if (index >= 10) break;
+		if (index >= 9) break;
 		if (scores[index] == 0){
 			fprintf(fp, "%d\n", endTime);
 			break;
@@ -694,6 +719,7 @@ void init_opengl(void)
 	quit = loadBMP("images/quit.bmp");
 	rules_button = loadBMP("images/rules_button.bmp");
 	rules = loadBMP("images/rules.bmp");
+	top_ten = loadBMP("images/top_ten.bmp");
 	win = loadBMP("images/win.bmp");
 	num_one = loadBMP("images/one.bmp");
 	num_two = loadBMP("images/two.bmp");
@@ -770,6 +796,7 @@ void check_mouse(void)
 		mouseOver02 = 0;
 		mouseOver03 = 0;
 		mouseOver04 = 0;
+		mouseOver05 = 0;
 		int b2 = board_dim/2;
 		int screen_center[2] = {xres/2, yres/2};
 		int s0 = screen_center[0];
@@ -792,11 +819,17 @@ void check_mouse(void)
 			y <= (s1+(b2/8))-((s1-(b2/4))/3)){
 			mouseOver03 = 1;
 		}
-		if (x >= s0-(b2/6) &&
-			x <= s0+(b2/6) &&
+		if (x >= (s0-(b2/6))-((s0-(b2))/2) &&
+			x <= (s0+(b2/6))-((s0-(b2))/2) &&
 			y >= (s1-(b2/11))-(s1-(b2/3)) &&
 			y <= (s1+(b2/11))-(s1-(b2/3))){
 			mouseOver04 = 1;
+		}
+		if (x >= (s0-(b2/6))+((s0-(b2))/2) &&
+			x <= (s0+(b2/6))+((s0-(b2))/2) &&
+			y >= (s1-(b2/11))-(s1-(b2/3)) &&
+			y <= (s1+(b2/11))-(s1-(b2/3))){
+			mouseOver05 = 1;
 		}
 	}
 }
@@ -877,12 +910,21 @@ void GLFWCALL mouse_click(int button, int action)
 					endGame = 1;
 				}
 			}
-			if (x >= s0-(b2/6) &&
-				x <= s0+(b2/6) &&
+			if (x >= (s0-(b2/6))-((s0-(b2))/2) &&
+				x <= (s0+(b2/6))-((s0-(b2))/2) &&
 				y >= (s1-(b2/11))-(s1-(b2/3)) &&
 				y <= (s1+(b2/11))-(s1-(b2/3))){
 				if (button == GLFW_MOUSE_BUTTON_LEFT){
 					gameState = 2;
+				}
+			}
+			if (x >= (s0-(b2/6))+((s0-(b2))/2) &&
+				x <= (s0+(b2/6))+((s0-(b2))/2) &&
+				y >= (s1-(b2/11))-(s1-(b2/3)) &&
+				y <= (s1+(b2/11))-(s1-(b2/3))){
+				if (button == GLFW_MOUSE_BUTTON_LEFT){
+					gameState = 3;
+					print_times();
 				}
 			}
 		}
@@ -920,6 +962,7 @@ void get_grid_center(const int i, const int j, int cent[2])
 //color changes
 void render(void)
 {
+	int minutes, seconds;
 	int i,j;
 	int b2 = board_dim/2;
 	int screen_center[2] = {xres/2, yres/2};
@@ -965,6 +1008,9 @@ void render(void)
 	}
 	if (gameState == 2){
 		glColor3f(0.3f, 0.8f, 0.3f);
+	}
+	if (gameState == 3){
+		glColor3f(0.4f, 0.9f, 0.9f);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindTexture(GL_TEXTURE_2D, backGround);
@@ -1033,10 +1079,23 @@ void render(void)
 		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
 		glBindTexture(GL_TEXTURE_2D, rules_button);
 		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 0.0f); glVertex2i(s0-(b2/6), (s1-(b2/11))-(s1-(b2/3)));
-			glTexCoord2f(0.0f, 1.0f); glVertex2i(s0-(b2/6), (s1+(b2/11))-(s1-(b2/3)));
-			glTexCoord2f(1.0f, 1.0f); glVertex2i(s0+(b2/6), (s1+(b2/11))-(s1-(b2/3)));
-			glTexCoord2f(1.0f, 0.0f); glVertex2i(s0+(b2/6), (s1-(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(0.0f, 0.0f); glVertex2i((s0-(b2/6))-((s0-(b2))/2), (s1-(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i((s0-(b2/6))-((s0-(b2))/2), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i((s0+(b2/6))-((s0-(b2))/2), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i((s0+(b2/6))-((s0-(b2))/2), (s1-(b2/11))-(s1-(b2/3)));
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
+		
+		if (mouseOver05 == 1){
+			glColor3f(1.0f, 1.0f, 0.0f);
+		}
+		else glColor4f(0.2f, 1.0f, 0.2f, 0.9f);
+		glBindTexture(GL_TEXTURE_2D, top_ten);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i((s0-(b2/6))+((s0-(b2))/2), (s1-(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(0.0f, 1.0f); glVertex2i((s0-(b2/6))+((s0-(b2))/2), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 1.0f); glVertex2i((s0+(b2/6))+((s0-(b2))/2), (s1+(b2/11))-(s1-(b2/3)));
+			glTexCoord2f(1.0f, 0.0f); glVertex2i((s0+(b2/6))+((s0-(b2))/2), (s1-(b2/11))-(s1-(b2/3)));
 		glEnd();
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -1054,6 +1113,70 @@ void render(void)
 		glEnd();
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+	
+	//=================================================================================================
+	if (gameState == 3){
+		glColor4f(0.0f, 0.0f, 0.0f, 0.9f);
+		glBegin(GL_QUADS);
+			glVertex2i(s0-b2, s1-b2);
+			glVertex2i(s0-b2, s1+b2);
+			glVertex2i(s0+b2, s1+b2);
+			glVertex2i(s0+b2, s1-b2);
+		glEnd();
+		
+		glColor3f(0.0f, 0.0f, 0.0f);
+		bp = 0;
+		glLineWidth(2);
+		int dec = 9;
+		for(i = 0; i < grid_dim; i++)
+		{
+			bp += bq;
+			if (i != 8){
+				glLineWidth(2);
+				glColor3f(0.4f, 0.4f, 0.4f);
+			
+				glBegin(GL_LINES);
+				if (i == 1){
+					glVertex2i((s0-b2) + bp, s1-b2);
+					glVertex2i((s0-b2) + bp, s1+b2);
+				}
+				glVertex2i(s0-b2, (s1-b2) + bp);
+				glVertex2i(s0+b2, (s1-b2) + bp);
+				glEnd();
+			}
+			
+			minutes = 0;
+			seconds = 0;
+			minutes = scores[i] / 60;
+			seconds = scores[i] - (minutes*60);
+	
+			Rect r;
+			r.left   = (s0-b2)+(bq/2);
+			r.bot    = ((s1-b2)+bp)-bq;
+			r.center = 0;
+			ggprint16(&r, 16, 0x0000cccc, "#%d",dec);
+			dec--;
+			
+			if (dec == 1){
+				r.left   = s0+bq;
+				r.bot    = (s1-b2)+bp;
+				r.center = 0;
+				if (scores[i] == 0){
+					ggprint12(&r, 16, 0x0000eeee, "<-- Be the First!!");
+				}
+				else
+					ggprint12(&r, 16, 0x0000eeee, "<-- Best Time!!");
+			}
+				
+			r.left   = s0;
+			r.bot    = ((s1-b2)+bp)-(bq);
+			r.center = 0;
+			ggprint13(&r, 16, 0x0000cccc, "%d:%02d",minutes,seconds);
+		}
+	}
+	
+	
+	
 	
 	//=================================================================================================
 	//draw the main game board in middle of screen
@@ -1085,8 +1208,8 @@ void render(void)
 		
 		
 		//Time
-		int minutes = 0;
-		int seconds = 0;
+		minutes = 0;
+		seconds = 0;
 		if (gameOver == 1){
 			currentTime = endTime;
 		}
