@@ -33,6 +33,7 @@ extern int init_array[9][9];
 void validTest(int x, int y);
 void place_random(void);
 void clear_board(void);
+void reset_board(void);
 void updateBoardSize(void);
 void fullBoard(void);
 void print_times(void);
@@ -171,15 +172,13 @@ int main(int argc, char *argv[])
 void GLFWCALL checkkey(int k1, int k2)
 {
 	if ((k1 == 'P') && (k2 == GLFW_RELEASE)) {
-		if(gameState != 0){ 
+		if(gameState == 1){ 
 			gameState = 0;
 			pause_time();
 			return;
 		}
-		else{
-			gameState = 1;
-			glfwSetTime(pauseTime);
-			return;
+		if ((gameState!=1) && (gameState!=0)){
+			gameState = 0;
 		}
 	}
 	if ((k1 == 'N') && (k2 == GLFW_RELEASE)) {
@@ -192,12 +191,15 @@ void GLFWCALL checkkey(int k1, int k2)
 		}
 		else printf("Out of Hints!!\n");
 	}
-	if ((k1 == 'S') && (k2 == GLFW_RELEASE)) {
+	if ((k1 == 'R') && (k2 == GLFW_RELEASE)) {
+		reset_board();
+	}
+	/*if ((k1 == 'S') && (k2 == GLFW_RELEASE)) {
 		print_times();
-	}
-	if ((k1 == 'W') && (k2 == GLFW_RELEASE)) {
+	}*/
+	/*if ((k1 == 'W') && (k2 == GLFW_RELEASE)) {
 		printf("width = %d\nheight = %d\n\n", xres,yres);
-	}
+	}*/
 	if (k1 == '0') {
 		playerMove = 0;
 		return;
@@ -436,6 +438,18 @@ void clear_board(void)
 			grid[x][y].value = 0;
 			grid[x][y].status = 0;
 			grid[x][y].highlight = 0;
+		}
+	}
+}
+
+void reset_board(void)
+{
+	int x, y;
+	for (x = 0; x < 9; x++){
+		for (y = 0; y < 9; y++){
+			if (board[x][y].status != 1){
+				grid[x][y].value = 0;
+			}
 		}
 	}
 }
@@ -854,6 +868,20 @@ void GLFWCALL mouse_click(int button, int action)
 						x <= cent[0]+qsize &&
 						y >= cent[1]-qsize &&
 						y <= cent[1]+qsize) {
+						if (button == GLFW_MOUSE_BUTTON_RIGHT){
+							if(!gameOver){
+								if(board[i][j].status != 1){
+									grid[i][j].value = 0;
+									for (a=0;a<9;a++){
+										for (b=0;b<9;b++){
+											grid[a][b].status = 0;
+											grid[a][b].highlight = 0;
+										}
+									}
+									validTest(i,j);
+								}
+							}
+						}
 						if (button == GLFW_MOUSE_BUTTON_LEFT){
 							if(!gameOver){
 								if(board[i][j].status != 1){
